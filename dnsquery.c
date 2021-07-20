@@ -118,6 +118,7 @@ int main()
 		e("bad rcode");
 	}
 
+	qdcount = ((uint16_t)r[4] << 8) | r[5];
 	ancount = ((uint16_t)r[6] << 8) | r[7];
 	if (ancount == 0) {
 		e("no answers");
