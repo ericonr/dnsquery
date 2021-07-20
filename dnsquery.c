@@ -104,6 +104,7 @@ int main()
 	sendto(s, q, i, 0, ap, sizeof addr);
 
 	ssize_t ret = recv(s, r, sizeof r, 0);
+	close(s);
 	if (ret < 0) {
 		perror("recv");
 		return 1;
