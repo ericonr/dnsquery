@@ -28,6 +28,12 @@ static void e(const char *str)
 	exit(1);
 }
 
+static void ep(const char *str, int v)
+{
+	fprintf(stderr, "%s: %d\n", str, v);
+	exit(1);
+}
+
 static void iter_name(const uint8_t *buf, size_t buf_len, char *name, size_t *name_pos, size_t *index, int recursion)
 {
 	if (recursion > 5) {
@@ -133,7 +139,7 @@ int main()
 
 	uint8_t rcode = r[3] & 0xf;
 	if (rcode) {
-		e("bad rcode");
+		ep("bad rcode", rcode);
 	}
 
 	qdcount = ((uint16_t)r[4] << 8) | r[5];
