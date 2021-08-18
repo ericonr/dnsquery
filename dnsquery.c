@@ -99,12 +99,13 @@ static void add_q(uint8_t *q, size_t *index, const char *qname, uint16_t qtype, 
 
 int main(int argc, char **argv)
 {
-	const char *query = "google.com";
+	const char *query = "google.com", *server = "127.0.0.1";
 	int c, get_aaaa = 0;
-	while ((c = getopt(argc, argv, "46d:")) != -1) {
+	while ((c = getopt(argc, argv, "46d:s:")) != -1) {
 		if (c == '4') get_aaaa = 0;
 		else if (c == '6') get_aaaa = 1;
 		else if (c == 'd') query = optarg;
+		else if (c == 's' && strcmp(optarg, "localhost")) server = optarg;
 		else e("bad options");
 	}
 
@@ -135,7 +136,7 @@ int main(int argc, char **argv)
 	q[5] = BYTE1(qdcount);
 
 	int s = socket(AF_INET, SOCK_DGRAM, 0);
-	struct sockaddr_in addr = {.sin_family=AF_INET, .sin_port=htons(53), .sin_addr=inet_addr("127.0.0.1")};
+	struct sockaddr_in addr = {.sin_family=AF_INET, .sin_port=htons(53), .sin_addr=inet_addr(server)};
 	void *ap = &addr;
 	sendto(s, q, i, 0, ap, sizeof addr);
 
