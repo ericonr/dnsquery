@@ -1,6 +1,8 @@
 /* DNS query
  *
- * based off of https://datatracker.ietf.org/doc/html/rfc1035
+ * based off of:
+ *   - https://datatracker.ietf.org/doc/html/rfc1035
+ *   - https://datatracker.ietf.org/doc/html/rfc3596
  *
  * understanding compression required some study of strace(1) output
  * from drill(1) and getent(1)
@@ -176,11 +178,35 @@ int main()
 		uint16_t rdlength = ((uint16_t)r[i] << 8) | r[i+1];
 		i+=2;
 
-		if (type == 1 && class == 1 && rdlength == 4) {
-			printf("IPv4: %d.%d.%d.%d\n", r[i], r[i+1], r[i+2], r[i+3]);
-		} else {
-			fputs("can't interpret answer\n", stderr);
+		if (class == QCLASS_IN) {
+			/* desired length */
+			uint16_t len_d;
+			/* formatting */
+			int af;
+			const char *ip_class;
+			char ip_s[INET6_ADDRSTRLEN];
+
+			if (type == QTYPE_A) {
+				len_d = 4;
+				af = AF_INET;
+				ip_class = "IPv4";
+			} else if (type == QTYPE_AAAA) {
+				len_d = 16;
+				af = AF_INET6;
+				ip_class = "IPv6";
+			} else {
+				ep("unknown qtype", type);
+			}
+			if (rdlength != len_d) ep("bad record length", rdlength);
+
+			/* address comes over the wire in network order */
+			if (!inet_ntop(af, r+i, ip_s, sizeof ip_s)) e("bad address");
+			i+=len_d;
+
+			printf("%s: %s\n", ip_class, ip_s);
+			continue;
 		}
+		e("can't interpret answer");
 	}
 
 	return 0;
