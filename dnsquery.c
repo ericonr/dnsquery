@@ -7,6 +7,9 @@
  * understanding compression required some study of strace(1) output
  * from drill(1) and getent(1)
  *
+ * this utility doesn't check for buffer overflows in any capacity,
+ * and is therefore extremely vulnerable to any form of malicious input
+ *
  */
 
 #include <stdint.h>
