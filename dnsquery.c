@@ -53,6 +53,39 @@ static void iter_name(const uint8_t *buf, size_t buf_len, char *name, size_t *na
 	*index = i;
 }
 
+#define QTYPE_A 1
+#define QTYPE_AAAA 28
+#define QCLASS_IN 1
+static void add_q(uint8_t *q, size_t *index, const char *qname, uint16_t qtype, uint16_t qclass, uint16_t *qdcount_written)
+{
+	size_t i = *index;
+
+	for (;;) {
+		const char *dot = strchr(qname, '.');
+
+		/* fragment length */
+		size_t f = dot ? dot - qname : strlen(qname);
+		if (f >= UINT8_MAX) e("bad qname");
+
+		q[i++] = f;
+		memcpy(q+i, qname, f);
+		i+=f;
+
+		if (dot) qname = dot+1;
+		else break;
+	}
+	/* terminator */
+	q[i++] = 0;
+
+	q[i++] = BYTE2(qtype);
+	q[i++] = BYTE1(qtype);
+	q[i++] = BYTE2(qclass);
+	q[i++] = BYTE1(qclass);
+	*index = i;
+
+	*qdcount_written += 1;
+}
+
 int main()
 {
 	uint8_t q[256], r[1024];
@@ -66,9 +99,7 @@ int main()
 	/* RA(1) Z(3) RCODE(4) */
 	q[3] = 0;
 
-	uint16_t qdcount = 1, ancount = 0, nscount = 0, arcount = 0;
-	q[4] = BYTE2(qdcount);
-	q[5] = BYTE1(qdcount);
+	uint16_t ancount = 0, nscount = 0, arcount = 0;
 	q[6] = BYTE2(ancount);
 	q[7] = BYTE1(ancount);
 	q[8] = BYTE2(nscount);
@@ -78,25 +109,11 @@ int main()
 
 	size_t i = 12;
 
-	/* QNAME
-	 * length and then content */
-	q[i++] = 6;
-	memcpy(q+i, "google", 6);
-	i+=6;
-	q[i++] = 3;
-	memcpy(q+i, "com", 3);
-	i+=3;
-	/* terminator */
-	q[i++] = 0;
-
-	/* QTYPE
-	 * A record */
-	q[i++] = 0;
-	q[i++] = 1;
-	/* QCLASS 
-	 * IN class */
-	q[i++] = 0;
-	q[i++] = 1;
+	uint16_t qdcount = 0;
+	add_q(q, &i, "google.com", QTYPE_A, QCLASS_IN, &qdcount);
+	//add_q(q, &i, "google.com", QTYPE_AAAA, QCLASS_IN, &qdcount);
+	q[4] = BYTE2(qdcount);
+	q[5] = BYTE1(qdcount);
 
 	int s = socket(AF_INET, SOCK_DGRAM, 0);
 	struct sockaddr_in addr = {.sin_family=AF_INET, .sin_port=htons(53), .sin_addr=inet_addr("127.0.0.1")};
