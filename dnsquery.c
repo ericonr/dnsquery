@@ -94,8 +94,17 @@ static void add_q(uint8_t *q, size_t *index, const char *qname, uint16_t qtype, 
 	*qdcount_written += 1;
 }
 
-int main()
+int main(int argc, char **argv)
 {
+	const char *query = "google.com";
+	int c, get_aaaa = 0;
+	while ((c = getopt(argc, argv, "46d:")) != -1) {
+		if (c == '4') get_aaaa = 0;
+		else if (c == '6') get_aaaa = 1;
+		else if (c == 'd') query = optarg;
+		else e("bad options");
+	}
+
 	uint8_t q[256], r[1024];
 
 	/* query id */
@@ -118,8 +127,7 @@ int main()
 	size_t i = 12;
 
 	uint16_t qdcount = 0;
-	add_q(q, &i, "google.com", QTYPE_A, QCLASS_IN, &qdcount);
-	//add_q(q, &i, "google.com", QTYPE_AAAA, QCLASS_IN, &qdcount);
+	add_q(q, &i, query, get_aaaa ? QTYPE_AAAA : QTYPE_A, QCLASS_IN, &qdcount);
 	q[4] = BYTE2(qdcount);
 	q[5] = BYTE1(qdcount);
 
