@@ -125,8 +125,8 @@ int main(int argc, char **argv)
 	q[7] = BYTE1(ancount);
 	q[8] = BYTE2(nscount);
 	q[9] = BYTE1(nscount);
-	q[10] = BYTE2(nscount);
-	q[11] = BYTE1(nscount);
+	q[10] = BYTE2(arcount);
+	q[11] = BYTE1(arcount);
 
 	size_t i = 12;
 
