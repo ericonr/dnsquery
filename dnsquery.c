@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdnoreturn.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -26,14 +27,14 @@
 #define BYTE1(x) (x & 0xff)
 #define BYTE2(x) ((x>>8)&0xff)
 
-static void e(const char *str)
+static noreturn void e(const char *str)
 {
 	fputs(str, stderr);
 	fputc('\n', stderr);
 	exit(1);
 }
 
-static void ep(const char *str, int v)
+static noreturn void ep(const char *str, int v)
 {
 	fprintf(stderr, "%s: %d\n", str, v);
 	exit(1);
