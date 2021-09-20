@@ -106,7 +106,7 @@ int main(int argc, char **argv)
 		else if (c == '6') get_aaaa = 1;
 		else if (c == 'd') query = optarg;
 		else if (c == 's' && strcmp(optarg, "localhost")) server = optarg;
-		else e("bad options");
+		else e("usage: dnsquery [-4|-6] [-d domain] [-s server]");
 	}
 
 	uint8_t q[256], r[1024];
